@@ -9,6 +9,10 @@ public class MapController : MonoBehaviour {
 
     private MapModel _mapModel;
 
+    public MapModel mapModel {
+        get { return _mapModel; }
+    }
+
     public Grid mapGrid {
         get {
             return _mapGrid;
@@ -24,7 +28,7 @@ public class MapController : MonoBehaviour {
     }
 
     private Tilemap tilemap;
-    
+
     // Use this for initialization
     void Awake() {
         _navController = new NavController();
@@ -87,22 +91,7 @@ public class MapController : MonoBehaviour {
     }
 
     public void AddStructure(Structure structure) {
-        HashSet<Vector2Int> positions = new HashSet<Vector2Int>();
-
-        Vector2Int cell = WorldToCell(structure.transform.position);
-
-        int minX = cell.x - structure.width / 2;
-        int maxX = cell.x + structure.width / 2 - 1;
-
-        int minY = cell.y - structure.length / 2;
-        int maxY = cell.y + structure.length / 2 - 1;
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                positions.Add(new Vector2Int(x, y));
-            }
-        }
-        
+        HashSet<Vector2Int> positions = WorldToStructurePositions(structure.transform.position, structure.width, structure.length);
         _mapModel.AddStructure(structure, positions);
     }
 
@@ -110,9 +99,25 @@ public class MapController : MonoBehaviour {
         _mapModel.RemoveStructure(structure);
     }
 
-    public Vector3 GetStructurePositionWorld(Structure structure) {
-        HashSet<Vector2Int> positions = _mapModel.GetStructurePositions(structure);
+    public HashSet<Vector2Int> WorldToStructurePositions(Vector3 worldPosition, int structWidth, int structLength) {
+        HashSet<Vector2Int> positions = new HashSet<Vector2Int>(new Vector2IntComparer());
+        Vector2Int cell = WorldToCell(worldPosition);
 
+        int minX = cell.x - structWidth / 2;
+        int maxX = cell.x + structWidth / 2 - 1;
+
+        int minY = cell.y - structLength / 2;
+        int maxY = cell.y + structLength / 2 - 1;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                positions.Add(new Vector2Int(x, y));
+            }
+        }
+        return positions;
+    }
+
+    public Vector3 GetStructurePositionWorld(HashSet<Vector2Int> positions) {
         if (positions.Count > 0) {
             Vector3 average = Vector3.zero;
             foreach (Vector2Int position in positions) {
@@ -123,6 +128,10 @@ public class MapController : MonoBehaviour {
         } else {
             return Vector3.negativeInfinity;
         }
+    }
+
+    public Vector3 GetStructurePositionWorld(Structure structure) {
+        return GetStructurePositionWorld(_mapModel.GetStructurePositions(structure));
     }
 
     public List<Vector3> GetStructurePositionsWorld(Structure structure) {

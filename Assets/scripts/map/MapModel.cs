@@ -52,7 +52,7 @@ public class MapModel {
     }
 
     public bool HardCorners(Vector2Int cell) {
-        return !tiles.ContainsKey(cell) || tiles[cell].hardCorners;
+        return !tiles.ContainsKey(cell) || tiles[cell].hardCorners || ContainsStructure(cell);
     }
 
     /* Units */
@@ -136,5 +136,9 @@ public class MapModel {
 
     public HashSet<Vector2Int> GetStructurePositions(Structure structure) {
         return structurePositionsForward[structure.GetInstanceID()];
+    }
+
+    public bool IsOccupied(Vector2Int cell) {
+        return ContainsStructure(cell) || ContainsUnit(cell) || !Traversable(cell);
     }
 }

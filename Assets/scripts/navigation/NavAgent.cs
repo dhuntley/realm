@@ -7,7 +7,7 @@ public class NavAgent : NavObstacle {
     // Current Path
     // Includes every node between here and destination.
     // Current position is not included in path.
-    private Queue<Vector2Int> path;
+    private Queue<Vector2Int> path = new Queue<Vector2Int>();
 
     private Vector2Int _destination;
 
@@ -18,18 +18,24 @@ public class NavAgent : NavObstacle {
         }
     }
 
+    private Unit unit;
+
     void Reset() {
         navigationLayer = NavigationLayer.Player;
+    }
+
+    private void Start() {
+        unit = GetComponent<Unit>();
     }
 
     protected override void OnEnable() {
         base.OnEnable();
     }
 
-    public void SetDestination(Vector2Int dest) {
+    public bool SetDestination(Vector2Int dest) {
         _destination = dest;
         // Do pathfinding
-        RecalculatePath();
+        return RecalculatePath();
 
         /*Vector2Int startPos2 = mapController.WorldToCell(transform.position);
         Vector3 currPos = new Vector3(startPos2.x, startPos2.y, -1);
@@ -46,6 +52,10 @@ public class NavAgent : NavObstacle {
         return path.Count > 0;
     }
 
+    public void ClearPath() {
+        path.Clear();
+    }
+
     public Vector2Int PopNextCell() {
         return path.Dequeue();
     }
@@ -54,7 +64,12 @@ public class NavAgent : NavObstacle {
         return path.Peek();
     }
 
-    public void RecalculatePath() {
-        path = navController.CalculatePath(cell, destination);
+    public bool RecalculatePath() {
+        Queue<Vector2Int> tempPath = navController.CalculatePath(unit.cell, destination);
+        if (tempPath.Count > 0) {
+            path = tempPath;
+            return true;
+        }
+        return false;
     }
 }

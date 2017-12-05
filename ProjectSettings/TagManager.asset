@@ -7,6 +7,7 @@ TagManager:
   - MapController
   - MapGrid
   - InputController
+  - Structures
   layers:
   - Default
   - TransparentFX
@@ -53,6 +54,6 @@ TagManager:
   - name: Units
     uniqueID: 3812339745
     locked: 0
-  - name: Buildings
+  - name: Structure Placement Hints
     uniqueID: 3661607999
     locked: 0

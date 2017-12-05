@@ -6,9 +6,19 @@ public class Structure : MonoBehaviour {
 
     protected MapController mapController;
 
-    public int width = 2;
+    public StructureModel structureModel;
 
-    public int length = 2;
+    public int width {
+        get {
+            return structureModel.width;
+        }
+    }
+
+    public int length {
+        get {
+            return structureModel.length;
+        }
+    }
 
     public int area {
         get {
@@ -17,7 +27,7 @@ public class Structure : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
+    void Start() {
         GameObject mapControllerGameObject = GameObject.FindWithTag("MapController");
 
         if (mapControllerGameObject == null) {
@@ -29,17 +39,14 @@ public class Structure : MonoBehaviour {
             Debug.LogError("Could not find mapController by tag to initialize Unit.");
         }
 
+        GetComponent<SpriteRenderer>().sprite = structureModel.sprite;
+
         Register();
     }
 
     protected virtual void OnDisable() {
         // Deregister position with NavController
         Deregister();
-    }
-
-    // Update is called once per frame
-    void Update () {
-        transform.position = new Vector3(transform.position.x, transform.position.y, Mathf.Min(transform.position.x, transform.position.y));
     }
 
     private void OnDrawGizmosSelected() {

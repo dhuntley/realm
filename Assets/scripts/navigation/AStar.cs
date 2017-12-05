@@ -2,7 +2,7 @@
 using UnityEngine;
 
 public class AStar : PathfindingAlgorithm {
- 
+
     public Queue<Vector2Int> CalculatePath(NavGraph graph, Vector2Int start, Vector2Int goal) {
         Vector2IntComparer comparer = new Vector2IntComparer();
 
@@ -17,7 +17,7 @@ public class AStar : PathfindingAlgorithm {
         f[start] = H(start, goal);
         open.Add(start);
 
-        while(open.Count > 0) {
+        while (open.Count > 0) {
             Vector2Int current = GetCurrent(open, f);
 
             if (comparer.Equals(current, goal)) {
@@ -31,8 +31,7 @@ public class AStar : PathfindingAlgorithm {
             foreach (NavGraph.NavEdge edge in neighbors) {
                 if (closed.Contains(edge.dest)) {
                     continue;
-                }
-                else if (!open.Contains(edge.dest)) {
+                } else if (!open.Contains(edge.dest)) {
                     open.Add(edge.dest);
                 }
 

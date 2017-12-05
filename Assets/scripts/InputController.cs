@@ -20,9 +20,17 @@ public class InputController : MonoBehaviour {
 
     private Vector3 selectStartWorld;
 
+    private bool _isBuilding = false;
+
+    public bool isBuilding {
+        get {
+            return GetComponent<StructurePlacer>().enabled;
+        }
+    }
+
     // Use this for initialization
     void Start() {
-
+        GetComponent<StructurePlacer>().enabled = false;
     }
 
     // Update is called once per frame
@@ -95,5 +103,14 @@ public class InputController : MonoBehaviour {
             selectedUnit.SetSelected(false);
         }
         selectedUnits.Clear();
+    }
+
+    public void HandleClickBuild(StructureModel structureModel) {
+        StructurePlacer structurePlacer = GetComponent<StructurePlacer>();
+        structurePlacer.enabled = !structurePlacer.enabled;
+        if (isBuilding) {
+            //Cursor.visible = false;
+            structurePlacer.structureModel = structureModel;
+        } 
     }
 }

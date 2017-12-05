@@ -23,10 +23,16 @@ public class Unit : MonoBehaviour {
 
     public float moveSpeed = 2.0f;
 
-	// Use this for initialization
-	void Start () {
+    public Vector2Int cell {
+        get {
+            return mapController.GetUnitPosition(this);
+        }
+    }
+
+    // Use this for initialization
+    void Start() {
         navAgent = GetComponent<NavAgent>();
-       
+
         if (navAgent == null) {
             Debug.LogError("Could not find navAgent component on Unit game object.");
         }
@@ -61,8 +67,12 @@ public class Unit : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update() {
         if (isMoving) {
+
+            // TODO: If a unit is blocked, but is "near enough" its destination, allow it to stop there
+            // (i.e., for formation movement). Need to somehow consider whether a unit moved as part of the
+            // same order has reached its destination already.
             if (unitIsBlocked && hasNextPosition) {
                 Vector2Int nextPos2Int = mapController.WorldToCell(nextPosition);
                 if (mapController.UpdateUnitPosition(this, nextPos2Int)) {
@@ -93,12 +103,10 @@ public class Unit : MonoBehaviour {
             }
         }
 
-        transform.position = new Vector3(transform.position.x, transform.position.y, Mathf.Min(transform.position.x, transform.position.y));
-
         if (inputController.isSelecting && inputController.IsInSelectRect(this)) {
             // TODO: Visual indicator of tentative selection?
         }
-	}
+    }
 
     private void OnDrawGizmosSelected() {
         if (mapController) {
@@ -126,12 +134,15 @@ public class Unit : MonoBehaviour {
     }
 
     public void HandleMoveRequest(Vector3 worldPoint) {
-        navAgent.SetDestination(mapController.WorldToCell(worldPoint));
-        isMoving = true;
-        unitIsBlocked = false;
-        hasNextPosition = false;
+        if (navAgent.SetDestination(mapController.WorldToCell(worldPoint))) {
+            isMoving = true;
+            unitIsBlocked = false;
+            hasNextPosition = false;
+        } else {
+            navAgent.ClearPath();
+        }
     }
-    
+
     private void Register() {
         mapController.AddUnit(this);
     }

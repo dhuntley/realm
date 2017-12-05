@@ -29,12 +29,6 @@ public class NavObstacle : MonoBehaviour {
 
     protected MapController mapController;
 
-    public Vector2Int cell {
-        get {
-            return mapController.WorldToCell(gameObject.transform.position);
-        }
-    }
-
     protected virtual void OnEnable() {
         GameObject mapControllerGameObject = GameObject.FindWithTag("MapController");
 
