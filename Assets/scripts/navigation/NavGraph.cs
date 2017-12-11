@@ -29,7 +29,7 @@ public class NavGraph {
 
     private const float DIAG_COST = 1.414f;
     private const float ORTH_COST = 1.0f;
-    private const float OBST_COST = 20.0f;  // The simulated cost to discourage a route blocked by an obstacle or agent
+    private const float OBST_COST = 40.0f;  // The simulated cost to discourage a route blocked by an obstacle or agent
 
     public MapModel mapModel;
 
