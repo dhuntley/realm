@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenuAttribute(menuName = "realm/StructureModel")]
 public class StructureModel : ScriptableObject {
@@ -13,4 +11,6 @@ public class StructureModel : ScriptableObject {
     public int area {
         get { return width * length; }
     }
+
+    public GameObject prefab;
 }

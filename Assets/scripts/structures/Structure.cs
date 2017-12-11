@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Structure : MonoBehaviour {
 
-    protected MapController mapController;
-
     public StructureModel structureModel;
 
     public int width {
@@ -28,32 +26,19 @@ public class Structure : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        GameObject mapControllerGameObject = GameObject.FindWithTag("MapController");
-
-        if (mapControllerGameObject == null) {
-            Debug.LogError("Could not find mapController by tag to initialize Unit.");
-        }
-
-        mapController = mapControllerGameObject.GetComponent<MapController>();
-        if (mapController == null) {
-            Debug.LogError("Could not find mapController by tag to initialize Unit.");
-        }
-
         GetComponent<SpriteRenderer>().sprite = structureModel.sprite;
-
         Register();
     }
 
     protected virtual void OnDisable() {
-        // Deregister position with NavController
         Deregister();
     }
 
     private void OnDrawGizmosSelected() {
-        if (mapController) {
-            Gizmos.DrawSphere(mapController.GetStructurePositionWorld(this), 0.1f);
+        if (MapController.HasInstance) {
+            Gizmos.DrawSphere(MapController.Instance.GetStructurePositionWorld(this), 0.1f);
 
-            List<Vector3> worldPositions = mapController.GetStructurePositionsWorld(this);
+            List<Vector3> worldPositions = MapController.Instance.GetStructurePositionsWorld(this);
 
             foreach (Vector3 position in worldPositions) {
                 Gizmos.color = Color.green;
@@ -63,10 +48,12 @@ public class Structure : MonoBehaviour {
     }
 
     private void Register() {
-        mapController.AddStructure(this);
+        MapController.Instance.AddStructure(this);
     }
 
     private void Deregister() {
-        mapController.RemoveStructure(this);
+        if (MapController.HasInstance) {
+            MapController.Instance.RemoveStructure(this);
+        }
     }
 }

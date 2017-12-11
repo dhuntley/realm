@@ -2,13 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InputController : MonoBehaviour {
+public class InputController : Singleton<InputController> {
 
     public Color selectBorderColor;
 
     public Color selectFillColor;
 
-    private List<Unit> selectedUnits = new List<Unit>();
+    private List<Unit> _selectedUnits = new List<Unit>();
+
+    public List<Unit> selectedUnits {
+        get {
+            return _selectedUnits;
+        }
+    }
+
+    public Unit selectedUnit {
+        get {
+            return _selectedUnits.Count > 0 ? _selectedUnits[0] : null;
+        }
+    }
 
     private bool _isSelecting = false;
 
@@ -20,59 +32,70 @@ public class InputController : MonoBehaviour {
 
     private Vector3 selectStartWorld;
 
-    private bool _isBuilding = false;
-
     public bool isBuilding {
         get {
-            return GetComponent<StructurePlacer>().enabled;
+            return StructurePlacer.Instance.enabled;
         }
     }
 
+    protected InputController() { }
+
     // Use this for initialization
     void Start() {
-        GetComponent<StructurePlacer>().enabled = false;
+        StructurePlacer.Instance.enabled = false;
     }
 
     // Update is called once per frame
     void Update() {
-        if (Input.GetMouseButtonDown(1)) {
-            foreach (Unit playerUnit in selectedUnits) {
-                Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                playerUnit.HandleMoveRequest(worldPoint);
+        if (!isBuilding) {
+            if (Input.GetMouseButtonDown(1)) {
+                foreach (Unit playerUnit in _selectedUnits) {
+                    Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    playerUnit.HandleMoveRequest(worldPoint);
+                }
             }
-        }
 
-        if (Input.GetMouseButtonDown(0)) {
-            _isSelecting = true;
-            selectStart = Input.mousePosition;
-            selectStartWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        }
+            if (Input.GetMouseButtonDown(0)) {
+                _isSelecting = true;
+                selectStart = Input.mousePosition;
+                selectStartWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            }
 
-        if (Input.GetMouseButtonUp(0) && _isSelecting) {
+            if (Input.GetMouseButtonUp(0) && _isSelecting) {
+                _isSelecting = false;
+
+                Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                float width = Mathf.Abs(mouseWorld.x - selectStartWorld.x);
+                float height = Mathf.Abs(mouseWorld.y - selectStartWorld.y);
+                float x = Mathf.Min(mouseWorld.x, selectStartWorld.x);
+                float y = Mathf.Min(mouseWorld.y, selectStartWorld.y);
+
+                Rect selectRect = new Rect(x, y, width, height);
+                Unit[] units = FindObjectsOfType<Unit>();
+                List<Unit> unitsToSelect = new List<Unit>();
+
+                foreach (Unit unit in units) {
+                    if (selectRect.Contains(unit.transform.position)) {
+                        unitsToSelect.Add(unit);
+                    }
+                }
+
+                if (unitsToSelect.Count > 0) {
+                    DeselectAllUnits();
+                    _selectedUnits = unitsToSelect;
+                    foreach (Unit unit in _selectedUnits) {
+                        unit.SetSelected(true);
+                    }
+                    RefreshGUIForSelection();
+                }
+            }
+        } else {
+            // StructurePlacer enabled / isBuilding == true
             _isSelecting = false;
-
-            Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            float width = Mathf.Abs(mouseWorld.x - selectStartWorld.x);
-            float height = Mathf.Abs(mouseWorld.y - selectStartWorld.y);
-            float x = Mathf.Min(mouseWorld.x, selectStartWorld.x);
-            float y = Mathf.Min(mouseWorld.y, selectStartWorld.y);
-
-            Rect selectRect = new Rect(x, y, width, height);
-            Unit[] units = FindObjectsOfType<Unit>();
-            List<Unit> unitsToSelect = new List<Unit>();
-
-            foreach (Unit unit in units) {
-                if (selectRect.Contains(unit.transform.position)) {
-                    unitsToSelect.Add(unit);
-                }
-            }
-
-            if (unitsToSelect.Count > 0) {
-                DeselectAllUnits();
-                selectedUnits = unitsToSelect;
-                foreach (Unit unit in selectedUnits) {
-                    unit.SetSelected(true);
-                }
+            if (Input.GetMouseButtonUp(1)) {
+                StructurePlacer.Instance.enabled = false;
+            } else if (Input.GetMouseButtonUp(0)) {
+                StructurePlacer.Instance.HandleConfirmPlacement();
             }
         }
     }
@@ -90,7 +113,8 @@ public class InputController : MonoBehaviour {
             DeselectAllUnits();
         }
 
-        selectedUnits.Add(unit);
+        _selectedUnits.Add(unit);
+        RefreshGUIForSelection();
         return true;
     }
 
@@ -99,18 +123,14 @@ public class InputController : MonoBehaviour {
     }
 
     private void DeselectAllUnits() {
-        foreach (Unit selectedUnit in selectedUnits) {
+        foreach (Unit selectedUnit in _selectedUnits) {
             selectedUnit.SetSelected(false);
         }
-        selectedUnits.Clear();
+        _selectedUnits.Clear();
+        RefreshGUIForSelection();
     }
-
-    public void HandleClickBuild(StructureModel structureModel) {
-        StructurePlacer structurePlacer = GetComponent<StructurePlacer>();
-        structurePlacer.enabled = !structurePlacer.enabled;
-        if (isBuilding) {
-            //Cursor.visible = false;
-            structurePlacer.structureModel = structureModel;
-        } 
+    
+    public void RefreshGUIForSelection() {
+        GUIController.Instance.RefreshForUnitSelection();
     }
 }

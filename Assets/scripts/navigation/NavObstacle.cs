@@ -23,22 +23,7 @@ public class NavObstacle : MonoBehaviour {
     // NavController
     protected NavController navController {
         get {
-            return mapController.navController;
-        }
-    }
-
-    protected MapController mapController;
-
-    protected virtual void OnEnable() {
-        GameObject mapControllerGameObject = GameObject.FindWithTag("MapController");
-
-        if (mapControllerGameObject == null) {
-            Debug.LogError("Could not find mapController by tag to initialize NavObstacle.");
-        }
-
-        mapController = mapControllerGameObject.GetComponent<MapController>();
-        if (mapController == null) {
-            Debug.LogError("Could not find mapController by tag to initialize NavObstacle.");
+            return MapController.Instance.navController;
         }
     }
 }

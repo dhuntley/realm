@@ -28,10 +28,6 @@ public class NavAgent : NavObstacle {
         unit = GetComponent<Unit>();
     }
 
-    protected override void OnEnable() {
-        base.OnEnable();
-    }
-
     public bool SetDestination(Vector2Int dest) {
         _destination = dest;
         // Do pathfinding

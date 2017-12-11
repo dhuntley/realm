@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Unit : MonoBehaviour {
 
@@ -11,21 +12,19 @@ public class Unit : MonoBehaviour {
     private bool hasNextPosition = false;
     private bool unitIsBlocked = false;
 
-    protected MapController mapController;
-
-    protected InputController inputController;
-
     private GameObject selectionCircle;
 
     private bool isMoving = false;
 
-    private bool isHovered = false;
+    //private bool isHovered = false;
+
+    private UnityAction onArriveAction;
 
     public float moveSpeed = 2.0f;
 
     public Vector2Int cell {
         get {
-            return mapController.GetUnitPosition(this);
+            return MapController.Instance.GetUnitPosition(this);
         }
     }
 
@@ -35,22 +34,6 @@ public class Unit : MonoBehaviour {
 
         if (navAgent == null) {
             Debug.LogError("Could not find navAgent component on Unit game object.");
-        }
-
-        GameObject mapControllerGameObject = GameObject.FindWithTag("MapController");
-
-        if (mapControllerGameObject == null) {
-            Debug.LogError("Could not find mapController by tag to initialize Unit.");
-        }
-
-        mapController = mapControllerGameObject.GetComponent<MapController>();
-        if (mapController == null) {
-            Debug.LogError("Could not find mapController by tag to initialize Unit.");
-        }
-
-        inputController = GameObject.FindObjectOfType<InputController>();
-        if (inputController == null) {
-            Debug.LogError("Could not find InputController to initialize Unit.");
         }
 
         selectionCircle = transform.Find("SelectionCircle").gameObject;
@@ -74,19 +57,19 @@ public class Unit : MonoBehaviour {
             // (i.e., for formation movement). Need to somehow consider whether a unit moved as part of the
             // same order has reached its destination already.
             if (unitIsBlocked && hasNextPosition) {
-                Vector2Int nextPos2Int = mapController.WorldToCell(nextPosition);
-                if (mapController.UpdateUnitPosition(this, nextPos2Int)) {
+                Vector2Int nextPos2Int = MapController.Instance.WorldToCell(nextPosition);
+                if (MapController.Instance.UpdateUnitPosition(this, nextPos2Int)) {
                     unitIsBlocked = false;
                 }
             }
 
             if (!hasNextPosition && navAgent.HasNextCell()) {
                 Vector2Int nextPos2Int = navAgent.PopNextCell();
-                nextPosition = mapController.GetCellCenterWorld(nextPos2Int);
+                nextPosition = MapController.Instance.GetCellCenterWorld(nextPos2Int);
 
                 hasNextPosition = true;
                 // Immediately update the map position to the neighbouring square
-                if (!mapController.UpdateUnitPosition(this, nextPos2Int)) {
+                if (!MapController.Instance.UpdateUnitPosition(this, nextPos2Int)) {
                     unitIsBlocked = true;
                 }
             } else if (!hasNextPosition && !navAgent.HasNextCell()) {
@@ -99,18 +82,22 @@ public class Unit : MonoBehaviour {
 
                 if (Vector2.Distance(transform.position, nextPosition) == 0f) {
                     hasNextPosition = false;
+                    if (!navAgent.HasNextCell() && onArriveAction != null) {
+                        // When unit arrives at destination, invoke onArriveAction
+                        onArriveAction.Invoke();
+                    }
                 }
             }
         }
 
-        if (inputController.isSelecting && inputController.IsInSelectRect(this)) {
+        if (InputController.Instance.isSelecting && InputController.Instance.IsInSelectRect(this)) {
             // TODO: Visual indicator of tentative selection?
         }
     }
 
     private void OnDrawGizmosSelected() {
-        if (mapController) {
-            Gizmos.DrawSphere(mapController.GetUnitPositionWorld(this), 0.1f);
+        if (MapController.HasInstance) {
+            Gizmos.DrawSphere(MapController.Instance.GetUnitPositionWorld(this), 0.1f);
         }
     }
 
@@ -119,22 +106,23 @@ public class Unit : MonoBehaviour {
     }
 
     private void OnMouseEnter() {
-        isHovered = true;
+        //isHovered = true;
     }
 
     private void OnMouseDown() {
         bool clearCurrentSelection = !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift);
-        if (inputController.SelectUnit(this, clearCurrentSelection)) {
+        if (InputController.Instance.SelectUnit(this, clearCurrentSelection)) {
             selectionCircle.SetActive(true);
         }
     }
 
     private void OnMouseExit() {
-        isHovered = false;
+        //isHovered = false;
     }
 
-    public void HandleMoveRequest(Vector3 worldPoint) {
-        if (navAgent.SetDestination(mapController.WorldToCell(worldPoint))) {
+    public void HandleMoveRequest(Vector3 worldPoint, UnityAction onArrive = null) {
+        if (navAgent.SetDestination(MapController.Instance.WorldToCell(worldPoint))) {
+            onArriveAction = onArrive;
             isMoving = true;
             unitIsBlocked = false;
             hasNextPosition = false;
@@ -144,10 +132,12 @@ public class Unit : MonoBehaviour {
     }
 
     private void Register() {
-        mapController.AddUnit(this);
+        MapController.Instance.AddUnit(this);
     }
 
     private void Deregister() {
-        mapController.RemoveUnit(this);
+        if (MapController.HasInstance) {
+            MapController.Instance.RemoveUnit(this);
+        }
     }
 }

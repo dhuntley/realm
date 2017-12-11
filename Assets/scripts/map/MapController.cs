@@ -3,7 +3,7 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class MapController : MonoBehaviour {
+public class MapController : Singleton<MapController> {
 
     private Grid _mapGrid;
 
@@ -28,6 +28,8 @@ public class MapController : MonoBehaviour {
     }
 
     private Tilemap tilemap;
+
+    protected MapController() { }
 
     // Use this for initialization
     void Awake() {
@@ -103,11 +105,11 @@ public class MapController : MonoBehaviour {
         HashSet<Vector2Int> positions = new HashSet<Vector2Int>(new Vector2IntComparer());
         Vector2Int cell = WorldToCell(worldPosition);
 
-        int minX = cell.x - structWidth / 2;
-        int maxX = cell.x + structWidth / 2 - 1;
+        int minX = cell.x - Mathf.FloorToInt(structWidth / 2.0f);
+        int maxX = cell.x + Mathf.CeilToInt(structWidth / 2.0f) - 1;
 
-        int minY = cell.y - structLength / 2;
-        int maxY = cell.y + structLength / 2 - 1;
+        int minY = cell.y - Mathf.FloorToInt(structLength / 2.0f);
+        int maxY = cell.y + Mathf.CeilToInt(structLength / 2.0f) - 1;
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
