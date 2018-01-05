@@ -7,12 +7,12 @@ MonoBehaviour:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
-  m_EditorHideFlags: 1
-  m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: checker_0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 947fad5bd7922e7468c0fc81bd1b7035, type: 3}
+  m_Name: trees
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: e0c558a6e40856a4596610200048d641, type: 3}
-  m_Color: {r: 0.26427335, g: 0.7647059, b: 0.49550772, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 497514984a98b3f4c8d87fe2a41fdb83, type: 3}
+  m_Color: {r: 0.73572665, g: 0.74337786, b: 0.7941176, a: 1}
   m_Transform:
     e00: 1
     e01: 0
@@ -32,4 +32,4 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 2
+  m_ColliderType: 0

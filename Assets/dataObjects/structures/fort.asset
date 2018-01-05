@@ -17,4 +17,4 @@ MonoBehaviour:
   prefab: {fileID: 1881611995349126, guid: 10c6e51f35f94a649b328415389af544, type: 2}
   resourceKeys:
   - gold
-  resourceCosts: fa000000
+  resourceCosts: c8000000

@@ -27,7 +27,9 @@ public class MapController : Singleton<MapController> {
         }
     }
 
-    private Tilemap tilemap;
+    private Tilemap terrainTilemap;
+
+    //private Tilemap treeTilemap;
 
     protected MapController() { }
 
@@ -46,12 +48,17 @@ public class MapController : Singleton<MapController> {
             Debug.LogError("Could not find Grid on GameObject with 'Map' tag.");
         }
 
-        tilemap = mapGridGameObject.GetComponentInChildren<Tilemap>();
-        if (tilemap == null) {
-            Debug.LogError("Could not find Tilemap on GameObject with 'Map' tag.");
+        terrainTilemap = mapGridGameObject.GetComponentsInChildren<Tilemap>()[0];
+        if (terrainTilemap == null) {
+            Debug.LogError("Could not find Terrain Tilemap on GameObject with 'Map' tag.");
         }
 
-        _mapModel = new MapModel(tilemap);
+        /*treeTilemap = mapGridGameObject.GetComponentsInChildren<Tilemap>()[1];
+        if (treeTilemap == null) {
+            Debug.LogError("Could not find Tree Tilemap on GameObject with 'Map' tag.");
+        }*/
+
+        _mapModel = new MapModel(terrainTilemap/*, treeTilemap*/);
         navController.mapModel = _mapModel;
     }
 

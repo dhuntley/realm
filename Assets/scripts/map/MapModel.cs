@@ -30,14 +30,15 @@ public class MapModel {
         }
     }*/
 
-    public MapModel(Tilemap tilemap) {
+    public MapModel(Tilemap terrainTilemap/*, Tilemap treeTilemap*/) {
         tiles = new Dictionary<Vector2Int, MapTile>();
-        BoundsInt tileMapBounds = tilemap.cellBounds;
+        BoundsInt tileMapBounds = terrainTilemap.cellBounds;
         for (int x = tileMapBounds.xMin; x <= tileMapBounds.xMax; x++) {
             for (int y = tileMapBounds.yMin; y <= tileMapBounds.yMax; y++) {
-                TileBase tile = tilemap.GetTile(new Vector3Int(x, y, 0));
+                TileBase tile = terrainTilemap.GetTile(new Vector3Int(x, y, 0));
+                //TileBase treeTile = treeTilemap.GetTile(new Vector3Int(x, y, 0));
                 if (tile != null && tile.name != null) {
-                    bool isWall = tile.name.Equals("checker_1");
+                    bool isWall = tile.name.Equals("checker_1") /*|| treeTile != null*/;
                     tiles[new Vector2Int(x, y)] = new MapTile(!isWall, isWall);
                 } else {
                     tiles[new Vector2Int(x, y)] = new MapTile(false, true);

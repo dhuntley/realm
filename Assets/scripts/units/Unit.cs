@@ -78,9 +78,9 @@ public class Unit : MonoBehaviour {
             }
 
             if (hasNextPosition && !unitIsBlocked) {
-                transform.position = Vector2.MoveTowards(transform.position, nextPosition, Time.deltaTime * moveSpeed);
+                transform.position = Vector3.MoveTowards(transform.position, nextPosition, Time.deltaTime * moveSpeed);
 
-                if (Vector2.Distance(transform.position, nextPosition) == 0f) {
+                if (Vector3.Distance(transform.position, nextPosition) == 0f) {
                     hasNextPosition = false;
                     if (!navAgent.HasNextCell() && onArriveAction != null) {
                         // When unit arrives at destination, invoke onArriveAction

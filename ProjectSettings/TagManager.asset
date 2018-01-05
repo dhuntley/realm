@@ -8,6 +8,7 @@ TagManager:
   - MapGrid
   - InputController
   - Structures
+  - Tilemap
   layers:
   - Default
   - TransparentFX

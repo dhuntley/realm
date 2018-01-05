@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: checker_1
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: 21300000, guid: 74f55f0c4c6311f4b91336703ff671fd, type: 3}
-  m_Color: {r: 0.3871435, g: 0.19928634, b: 0.71323526, a: 1}
+  m_Color: {r: 0.16025089, g: 0.16107267, b: 0.2794118, a: 1}
   m_Transform:
     e00: 1
     e01: 0
@@ -32,4 +32,4 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 0
+  m_ColliderType: 2

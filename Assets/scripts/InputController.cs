@@ -50,8 +50,12 @@ public class InputController : Singleton<InputController> {
         if (!isBuilding) {
             if (Input.GetMouseButtonDown(1)) {
                 foreach (Unit playerUnit in _selectedUnits) {
-                    Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    playerUnit.HandleMoveRequest(worldPoint);
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+
+                    if (Physics.Raycast(ray, out hit) && hit.collider.tag.Equals("Tilemap")) {
+                        playerUnit.HandleMoveRequest(hit.point);
+                    }
                 }
             }
 
