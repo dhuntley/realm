@@ -94,7 +94,7 @@ public class StructurePlacer : Singleton<StructurePlacer> {
 
             if (HasSufficientResources()) {
                 if (InputController.Instance.selectedUnit) {
-                    InputController.Instance.selectedUnit.HandleMoveRequest(position, () => {
+                    InputController.Instance.selectedUnit.HandleMoveRequest(MapController.Instance.WorldToCell(position), () => {
                         InstantiateStructure(prefab, position);
                     });
                 } else {

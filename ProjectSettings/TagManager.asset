@@ -8,6 +8,9 @@ TagManager:
   - MapGrid
   - InputController
   - Structures
+  - TerrainTilemap
+  - TreeTilemap
+  - Trees
   layers:
   - Default
   - TransparentFX
@@ -51,9 +54,15 @@ TagManager:
   - name: Unit Selections
     uniqueID: 1908425159
     locked: 0
+  - name: Stumps
+    uniqueID: 1360655947
+    locked: 0
   - name: Units
     uniqueID: 3812339745
     locked: 0
   - name: Structure Placement Hints
     uniqueID: 3661607999
+    locked: 0
+  - name: Overlay
+    uniqueID: 3058763229
     locked: 0

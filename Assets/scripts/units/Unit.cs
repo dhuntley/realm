@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class Unit : MonoBehaviour {
+public abstract class Unit : MonoBehaviour {
 
     private NavAgent navAgent;
 
@@ -21,6 +19,10 @@ public class Unit : MonoBehaviour {
     private UnityAction onArriveAction;
 
     public float moveSpeed = 2.0f;
+
+    private ProgressBar progressBar;
+
+    private GameObject progressBarGameObject;
 
     public Vector2Int cell {
         get {
@@ -40,6 +42,13 @@ public class Unit : MonoBehaviour {
         if (selectionCircle == null) {
             Debug.LogError("No SelectionCircle gameobject present on Unit.");
         }
+
+        progressBar = GetComponentInChildren<ProgressBar>();
+        if (progressBar == null) {
+            Debug.LogError("No ProgressBar gameobject present on Unit.");
+        }
+        progressBarGameObject = progressBar.gameObject;
+        progressBarGameObject.SetActive(false);
 
         Register();
     }
@@ -95,6 +104,10 @@ public class Unit : MonoBehaviour {
         }
     }
 
+    private void OnDestroy() {
+        StopAllRequests();
+    }
+
     private void OnDrawGizmosSelected() {
         if (MapController.HasInstance) {
             Gizmos.DrawSphere(MapController.Instance.GetUnitPositionWorld(this), 0.1f);
@@ -120,8 +133,9 @@ public class Unit : MonoBehaviour {
         //isHovered = false;
     }
 
-    public void HandleMoveRequest(Vector3 worldPoint, UnityAction onArrive = null) {
-        if (navAgent.SetDestination(MapController.Instance.WorldToCell(worldPoint))) {
+    public void HandleMoveRequest(Vector2Int targetCell, UnityAction onArrive = null) {
+        StopAllRequests();
+        if (navAgent.SetDestination(targetCell)) {
             onArriveAction = onArrive;
             isMoving = true;
             unitIsBlocked = false;
@@ -129,6 +143,31 @@ public class Unit : MonoBehaviour {
         } else {
             navAgent.ClearPath();
         }
+    }
+
+    public virtual void HandleInteractionRequest(Vector2Int worldPoint) { }
+
+    public void HandleInteractionRequest(Vector3 worldPoint) {
+        HandleInteractionRequest(MapController.Instance.WorldToCell(worldPoint));
+    }
+
+    public virtual void HandleInteractionRequest(Structure structure) { }
+
+    public void SetProgress(float progress) {
+        progressBar.progress = progress;
+    }
+
+    public void SetProgressTotal(float total) {
+        progressBar.total = total;
+    }
+
+    public void SetProgressBarEnabled(bool enabled) {
+        progressBarGameObject.SetActive(enabled);
+    }
+
+    private void StopAllRequests() {
+        progressBarGameObject.SetActive(false);
+        StopAllCoroutines();
     }
 
     private void Register() {

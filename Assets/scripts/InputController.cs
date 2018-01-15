@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class InputController : Singleton<InputController> {
 
@@ -47,24 +48,41 @@ public class InputController : Singleton<InputController> {
 
     // Update is called once per frame
     void Update() {
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         if (!isBuilding) {
             if (Input.GetMouseButtonDown(1)) {
-                foreach (Unit playerUnit in _selectedUnits) {
-                    Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                    playerUnit.HandleMoveRequest(worldPoint);
+                // See if the user has clicked on an interactable object for the selected units
+                Collider2D[] colliders = Physics2D.OverlapPointAll(mouseWorld);
+                if (colliders != null && colliders.Length > 0) {
+                    Collider2D frontCollider = null;
+                    int sortOrder = int.MinValue;
+                    foreach (Collider2D collider in colliders) {
+                        SpriteRenderer renderer = collider.GetComponent<SpriteRenderer>();
+                        if (renderer && renderer.sortingOrder > sortOrder) {
+                            sortOrder = renderer.sortingOrder;
+                            frontCollider = collider;
+                        }
+                    }
+                    foreach (Unit playerUnit in _selectedUnits) {
+                        playerUnit.HandleInteractionRequest(frontCollider.transform.position);
+                    }
+                } else {
+                    // Move selected units to the target tile
+                    foreach (Unit playerUnit in _selectedUnits) {
+                        playerUnit.HandleMoveRequest(MapController.Instance.WorldToCell(mouseWorld));
+                    }
                 }
             }
 
             if (Input.GetMouseButtonDown(0)) {
                 _isSelecting = true;
                 selectStart = Input.mousePosition;
-                selectStartWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                selectStartWorld = mouseWorld;
             }
 
             if (Input.GetMouseButtonUp(0) && _isSelecting) {
                 _isSelecting = false;
-
-                Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                
                 float width = Mathf.Abs(mouseWorld.x - selectStartWorld.x);
                 float height = Mathf.Abs(mouseWorld.y - selectStartWorld.y);
                 float x = Mathf.Min(mouseWorld.x, selectStartWorld.x);

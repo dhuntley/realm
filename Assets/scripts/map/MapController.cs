@@ -3,6 +3,9 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+// TODO: Clean up the interface of MapController / MapModel.
+// It is muddy how other classes are supposed to interact with these two.
+
 public class MapController : Singleton<MapController> {
 
     private Grid _mapGrid;
@@ -27,7 +30,11 @@ public class MapController : Singleton<MapController> {
         }
     }
 
-    private Tilemap tilemap;
+    private Tilemap terrainTilemap;
+
+    public GameObject stumpPrefab;
+
+    public GameObject treePrefab;
 
     protected MapController() { }
 
@@ -46,13 +53,38 @@ public class MapController : Singleton<MapController> {
             Debug.LogError("Could not find Grid on GameObject with 'Map' tag.");
         }
 
-        tilemap = mapGridGameObject.GetComponentInChildren<Tilemap>();
-        if (tilemap == null) {
+        // Init map model from terrain tilemap
+        terrainTilemap = GameObject.FindGameObjectWithTag("TerrainTilemap").GetComponent<Tilemap>();
+        if (terrainTilemap == null) {
             Debug.LogError("Could not find Tilemap on GameObject with 'Map' tag.");
         }
 
-        _mapModel = new MapModel(tilemap);
+        _mapModel = new MapModel(terrainTilemap);
         navController.mapModel = _mapModel;
+
+        // Spawn trees based on tree tilemap
+        GameObject treeContainer = new GameObject("Trees");
+        treeContainer.tag = "Trees";
+        GameObject treeTileMapGameObject = GameObject.FindGameObjectWithTag("TreeTilemap");
+        Tilemap treeTilemap = treeTileMapGameObject.GetComponent<Tilemap>();
+        if (treeTilemap == null) {
+            Debug.LogError("Could not find Tilemap on GameObject with 'Map' tag.");
+        }
+        BoundsInt tileMapBounds = treeTilemap.cellBounds;
+        for (int x = tileMapBounds.xMin; x <= tileMapBounds.xMax; x++) {
+            for (int y = tileMapBounds.yMin; y <= tileMapBounds.yMax; y++) {
+                TileBase treeTile = treeTilemap.GetTile(new Vector3Int(x, y, 0));
+                if (treeTile) {
+                    Vector2Int treeCell = new Vector2Int(x, y);
+                    Vector3 treeWorldPosition = GetCellCenterWorld(treeCell);
+                    GameObject treeGameObject = GameObject.Instantiate(treePrefab, treeWorldPosition, Quaternion.identity, treeContainer.transform);
+                    treeGameObject.GetComponent<SpriteRenderer>().sortingOrder = Mathf.FloorToInt(-4 * treeWorldPosition.y);
+                    _mapModel.AddTree(treeGameObject, treeCell);
+                }
+            }
+        }
+
+        GameObject.Destroy(treeTileMapGameObject);
     }
 
     public Vector2Int WorldToCell(Vector3 position) {
@@ -71,6 +103,15 @@ public class MapController : Singleton<MapController> {
             return Vector3.negativeInfinity;
         }
     }
+
+    public void RemoveTree(Vector2Int cell) {
+        mapModel.RemoveTree(cell);
+        Vector3 treeWorldPosition = GetCellCenterWorld(cell);
+        GameObject treeContainer = GameObject.FindGameObjectWithTag("Trees");
+        GameObject treeGameObject = GameObject.Instantiate(stumpPrefab, treeWorldPosition, Quaternion.identity, treeContainer.transform);
+    }
+
+    // Units
 
     public void AddUnit(Unit unit) {
         _mapModel.AddUnit(unit, WorldToCell(unit.transform.position));
@@ -91,6 +132,8 @@ public class MapController : Singleton<MapController> {
     public Vector3 GetUnitPositionWorld(Unit unit) {
         return GetCellCenterWorld(_mapModel.GetUnitPosition(unit));
     }
+
+    // Structures
 
     public void AddStructure(Structure structure) {
         HashSet<Vector2Int> positions = WorldToStructurePositions(structure.transform.position, structure.width, structure.length);
