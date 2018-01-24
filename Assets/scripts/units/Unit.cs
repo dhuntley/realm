@@ -18,6 +18,10 @@ public abstract class Unit : MonoBehaviour {
 
     private UnityAction onArriveAction;
 
+    public delegate Vector2Int OnBlockedAction();
+
+    private OnBlockedAction onBlockedAction;
+
     public float moveSpeed = 2.0f;
 
     private ProgressBar progressBar;
@@ -78,8 +82,16 @@ public abstract class Unit : MonoBehaviour {
 
                 hasNextPosition = true;
                 // Immediately update the map position to the neighbouring square
-                if (!MapController.Instance.UpdateUnitPosition(this, nextPos2Int)) {
+                if (!MapController.Instance.UpdateUnitPosition(this, nextPos2Int) && !unitIsBlocked) {
                     unitIsBlocked = true;
+                    // If the agent is blocked and the destination cell is not occupied,
+                    // calculate a new path.
+                    if (!MapController.Instance.mapModel.IsOccupied(navAgent.destination)) {
+                        navAgent.RecalculatePath();
+                        hasNextPosition = false;
+                    } else if (onBlockedAction != null) {
+                        navAgent.SetDestination(onBlockedAction.Invoke());
+                    }
                 }
             } else if (!hasNextPosition && !navAgent.HasNextCell()) {
                 isMoving = false;
@@ -133,10 +145,11 @@ public abstract class Unit : MonoBehaviour {
         //isHovered = false;
     }
 
-    public void HandleMoveRequest(Vector2Int targetCell, UnityAction onArrive = null) {
+    public void HandleMoveRequest(Vector2Int targetCell, UnityAction onArrive = null, OnBlockedAction onBlocked = null) {
         StopAllRequests();
         if (navAgent.SetDestination(targetCell)) {
             onArriveAction = onArrive;
+            onBlockedAction = onBlocked;
             isMoving = true;
             unitIsBlocked = false;
             hasNextPosition = false;
@@ -165,7 +178,7 @@ public abstract class Unit : MonoBehaviour {
         progressBarGameObject.SetActive(enabled);
     }
 
-    private void StopAllRequests() {
+    protected virtual void StopAllRequests() {
         progressBarGameObject.SetActive(false);
         StopAllCoroutines();
     }

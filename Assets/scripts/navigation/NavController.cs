@@ -6,6 +6,12 @@ public class NavController {
     // Graph of nodes and agents reflecting locations of obstacles / agents
     private NavGraph graph = new NavGraph();
 
+    public NavGraph navGraph {
+        get {
+            return graph;
+        }
+    }
+
     private PathfindingAlgorithm algorithm = new AStar();
 
     // Map
@@ -23,6 +29,7 @@ public class NavController {
             _mapModel = value;
             
             graph.mapModel = mapModel;
+            graph.InitNavAreas();
 
             // TODO: Make sure there isn't a lifecycle bug here.
             // We might be double registering agents.

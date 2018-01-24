@@ -3,18 +3,6 @@ using UnityEngine;
 
 public class NavGraph {
 
-    // Static obstacles and their locations
-    //private Dictionary<int, NavObstacle> obstacles = new Dictionary<int, NavObstacle>();
-
-    // Obstacle locations
-    //private Dictionary<Vector2Int, NavObstacle> obstaclePositions = new Dictionary<Vector2Int, NavObstacle>(new Vector2IntComparer());
-
-    // Dynamic agents, indexed by GameObject InstanceId
-    //private Dictionary<int, NavAgent> agents = new Dictionary<int, NavAgent>();
-
-    // Agent locations
-    //private Dictionary<Vector2Int, NavAgent> agentPositions = new Dictionary<Vector2Int, NavAgent>(new Vector2IntComparer());
-
     public struct NavEdge {
         public Vector2Int start;
         public Vector2Int dest;
@@ -32,6 +20,13 @@ public class NavGraph {
     private const float OBST_COST = 40.0f;  // The simulated cost to discourage a route blocked by an obstacle or agent
 
     public MapModel mapModel;
+
+    public NavAreaMap navAreaMap;
+
+    public void InitNavAreas() {
+        Debug.Assert(mapModel != null);
+        navAreaMap = new NavAreaMap(this);
+    }
 
     public List<NavEdge> GetNeighbors(Vector2Int node) {
         List<NavEdge> neighbors = new List<NavEdge>();

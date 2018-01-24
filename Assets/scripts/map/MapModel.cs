@@ -23,7 +23,7 @@ public class MapModel {
 
     // Trees
     private Dictionary<Vector2Int, GameObject> trees = new Dictionary<Vector2Int, GameObject>();
-
+    
     /*public MapModel() {
         tiles = new MapTile[20, 20];
         for (int x=0; x<tiles.GetLength(0); x++) {
@@ -144,12 +144,14 @@ public class MapModel {
     public Structure GetClosestStructure(Vector2Int cell) {
         float minDistance = float.MaxValue;
         Structure closestStructure = null;
+        Vector3 cellPosition = new Vector3(cell.x, cell.y);
+
         foreach (int key in structures.Keys) {
             Vector2Int structureCell = structurePositionsForward[key].GetEnumerator().Current;
-            float distance = Vector2Int.Distance(cell, structureCell);
+            float sqrDistance = (cellPosition - new Vector3(structureCell.x, structureCell.y)).sqrMagnitude;
 
-            if (distance < minDistance) {
-                minDistance = distance;
+            if (sqrDistance < minDistance) {
+                minDistance = sqrDistance;
                 closestStructure = structures[key];
             }
         }
@@ -178,6 +180,7 @@ public class MapModel {
         }
     }
 
+    // TODO: This could use improvement. Think of a good heuristic.
     public Vector2Int GetNextTreePosition(Vector2Int treeCell, Vector2Int origin) {
         Vector2Int ul = new Vector2Int(treeCell.x - 1, treeCell.y - 1);
         Vector2Int u = new Vector2Int(treeCell.x, treeCell.y - 1);
@@ -189,20 +192,21 @@ public class MapModel {
         Vector2Int dr = new Vector2Int(treeCell.x + 1, treeCell.y + 1);
 
         List<Vector2Int> candidateNodes = new List<Vector2Int>(new[] { ul, u, ur, l, r, dl, d, dr });
-        List<Vector2Int> treeNodes = new List<Vector2Int>();
+
+        int maxInteractionNodes = 0;
+        Vector2Int nextTreeCell = new Vector2Int(int.MinValue, int.MinValue);
 
         foreach (Vector2Int treeNode in candidateNodes) {
             if (trees.ContainsKey(treeNode) && GetInteractionNodes(treeNode, origin).Length > 0) {
-                treeNodes.Add(treeNode);
+                Vector2Int[] interactionNodes = GetInteractionNodes(treeNode, origin);
+                if (interactionNodes.Length > maxInteractionNodes) {
+                    maxInteractionNodes = interactionNodes.Length;
+                    nextTreeCell = treeNode;
+                }
             }
         }
 
-        if (treeNodes.Count > 0) {
-            return treeNodes[Random.Range(0, treeNodes.Count)];
-        } else {
-            return new Vector2Int(int.MinValue, int.MinValue);
-        }
-
+        return nextTreeCell;
     }
 
     private static Vector2Int GetClosestNode(Vector2Int[] nodes, Vector2Int origin) {

@@ -60,7 +60,6 @@ public class MapController : Singleton<MapController> {
         }
 
         _mapModel = new MapModel(terrainTilemap);
-        navController.mapModel = _mapModel;
 
         // Spawn trees based on tree tilemap
         GameObject treeContainer = new GameObject("Trees");
@@ -85,6 +84,9 @@ public class MapController : Singleton<MapController> {
         }
 
         GameObject.Destroy(treeTileMapGameObject);
+
+        // Initialize navController after Trees are placed
+        navController.mapModel = _mapModel;
     }
 
     public Vector2Int WorldToCell(Vector3 position) {
@@ -189,4 +191,12 @@ public class MapController : Singleton<MapController> {
 
         return worldPositions;
     }
+
+    /*private void OnDrawGizmos() {
+        Dictionary<Vector2Int, int> navAreaAssignments = navController.navGraph.navAreaMap.GetNavAreaAssignments();
+        foreach (Vector2Int cell in navAreaAssignments.Keys) {
+            Gizmos.color = navController.navGraph.navAreaMap.GetNavAreaColor(navAreaAssignments[cell]);
+            Gizmos.DrawCube(GetCellCenterWorld(cell), Vector3.one / 5);
+        }
+    }*/
 }

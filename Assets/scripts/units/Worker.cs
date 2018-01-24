@@ -14,6 +14,16 @@ public class Worker : Unit {
 
     private bool carryingLumber = false;
 
+    public bool isCuttingTree = false;
+
+    private Vector2Int _currentTree;
+
+    public Vector2Int currentCuttingTree {
+        get {
+            return isCuttingTree ? _currentTree : new Vector2Int(int.MinValue, int.MinValue);
+        }
+    }
+
     [GUIPanel("Build Fort")]
     public void BuildFort() {
         StructurePlacer structurePlacer = StructurePlacer.Instance;
@@ -30,6 +40,8 @@ public class Worker : Unit {
 
     //TODO: Should we handle this with a Coroutine, or should it be handled with a state and Update?
     private IEnumerator CutDownTree(Vector2Int targetCell) {
+        isCuttingTree = true;
+        _currentTree = targetCell;
         float startTime = Time.time;
         SetProgress(0.0f);
         SetProgressTotal(treeCutTime);
@@ -40,6 +52,7 @@ public class Worker : Unit {
         }
         SetProgressBarEnabled(false);
         MapController.Instance.RemoveTree(targetCell);
+        isCuttingTree = false;
         carryingLumber = true;
         lastTreeCut = targetCell;
 
@@ -63,8 +76,13 @@ public class Worker : Unit {
             Vector2Int interactionNode = MapController.Instance.mapModel.GetInteractionNode(targetCell, this.cell);
             HandleMoveRequest(interactionNode, () => {
                 if (carryingLumber) {
+                    lastTreeCut = interactionNode;
                     ReturnLumber();
+                } else if (!MapController.Instance.mapModel.ContainsTree(targetCell) || UnitManager.Instance.TreeIsBeingCut(targetCell)) {
+                    // The tree has already been cut down, or someone else is cutting down the tree
+                    HandleInteractionRequest(MapController.Instance.mapModel.GetNextTreePosition(targetCell, this.cell));
                 } else {
+                    // The tree is free. Let's chop it down!
                     StartCoroutine(CutDownTree(targetCell));
                 }
             });
@@ -82,6 +100,14 @@ public class Worker : Unit {
                 // Cut down next tree
                 HandleInteractionRequest(MapController.Instance.mapModel.GetNextTreePosition(lastTreeCut, this.cell));
             }
+        }, () => {
+            // Select a new interaction node. Our desired one is blocked.
+            return MapController.Instance.mapModel.GetInteractionNode(structure, this.cell);
         });
+    }
+
+    protected override void StopAllRequests() {
+        base.StopAllRequests();
+        isCuttingTree = false;
     }
 }
