@@ -93,7 +93,7 @@ public class InputController : Singleton<InputController> {
                 List<Unit> unitsToSelect = new List<Unit>();
 
                 foreach (Unit unit in units) {
-                    if (selectRect.Contains(unit.transform.position)) {
+                    if (selectRect.Contains(unit.transform.position) && !unit.isBusy) {
                         unitsToSelect.Add(unit);
                     }
                 }
@@ -127,6 +127,10 @@ public class InputController : Singleton<InputController> {
     }
 
     public bool SelectUnit(Unit unit, bool clearExistingSelection) {
+        if (unit.isBusy) {
+            return false;
+        }
+
         if (clearExistingSelection) {
             DeselectAllUnits();
         }
@@ -147,7 +151,17 @@ public class InputController : Singleton<InputController> {
         _selectedUnits.Clear();
         RefreshGUIForSelection();
     }
-    
+
+    public void DeselectUnit(Unit unit) {
+        foreach (Unit selectedUnit in _selectedUnits) {
+            if (unit == selectedUnit) {
+                selectedUnit.SetSelected(false);
+            }
+        }
+        _selectedUnits.Remove(selectedUnit);
+        RefreshGUIForSelection();
+    }
+
     public void RefreshGUIForSelection() {
         GUIController.Instance.RefreshForUnitSelection();
     }

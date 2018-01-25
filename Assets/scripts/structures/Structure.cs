@@ -24,10 +24,62 @@ public class Structure : MonoBehaviour {
         }
     }
 
+    [HideInInspector]
+    public Unit builder;
+
+    public bool underConstruction = true;
+
+    private ProgressBar progressBar;
+
+    private GameObject progressBarGameObject;
+
     // Use this for initialization
     void Start() {
         GetComponent<SpriteRenderer>().sprite = structureModel.sprite;
+
+        progressBar = GetComponentInChildren<ProgressBar>();
+        if (progressBar == null) {
+            Debug.LogError("No ProgressBar gameobject present on Unit.");
+        }
+        progressBarGameObject = progressBar.gameObject;
+        progressBarGameObject.SetActive(false);
+
         Register();
+
+        if (underConstruction) {
+            StartCoroutine(Construct());
+        }
+    }
+
+    public void SetProgress(float progress) {
+        progressBar.progress = progress;
+    }
+
+    public void SetProgressTotal(float total) {
+        progressBar.total = total;
+    }
+
+    public void SetProgressBarEnabled(bool enabled) {
+        progressBarGameObject.SetActive(enabled);
+    }
+
+    private IEnumerator Construct() {
+        float startTime = Time.time;
+        SetProgress(0.0f);
+        SetProgressTotal(structureModel.constructionTime);
+        while (Time.time < startTime + structureModel.constructionTime) {
+            SetProgress(Time.time - startTime);
+            SetProgressBarEnabled(true);
+            yield return null;
+        }
+        SetProgressBarEnabled(false);
+
+        underConstruction = false;
+        if (builder) {
+            builder.HandleMoveRequest(MapController.Instance.mapModel.GetInteractionNode(this, builder.cell), () => {
+                builder.isBusy = false;
+            });
+        }
     }
 
     protected virtual void OnDisable() {

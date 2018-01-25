@@ -138,7 +138,7 @@ public class MapController : Singleton<MapController> {
     // Structures
 
     public void AddStructure(Structure structure) {
-        HashSet<Vector2Int> positions = WorldToStructurePositions(structure.transform.position, structure.width, structure.length);
+        Vector2Int[] positions = WorldToStructurePositions(structure.transform.position, structure.width, structure.length);
         _mapModel.AddStructure(structure, positions);
     }
 
@@ -146,8 +146,8 @@ public class MapController : Singleton<MapController> {
         _mapModel.RemoveStructure(structure);
     }
 
-    public HashSet<Vector2Int> WorldToStructurePositions(Vector3 worldPosition, int structWidth, int structLength) {
-        HashSet<Vector2Int> positions = new HashSet<Vector2Int>(new Vector2IntComparer());
+    public Vector2Int[] WorldToStructurePositions(Vector3 worldPosition, int structWidth, int structLength) {
+        Vector2Int[] positions = new Vector2Int[structWidth * structLength];
         Vector2Int cell = WorldToCell(worldPosition);
 
         int minX = cell.x - Mathf.FloorToInt(structWidth / 2.0f);
@@ -156,22 +156,23 @@ public class MapController : Singleton<MapController> {
         int minY = cell.y - Mathf.FloorToInt(structLength / 2.0f);
         int maxY = cell.y + Mathf.CeilToInt(structLength / 2.0f) - 1;
 
+        int count = 0;
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
-                positions.Add(new Vector2Int(x, y));
+                positions[count++] = new Vector2Int(x, y);
             }
         }
         return positions;
     }
 
-    public Vector3 GetStructurePositionWorld(HashSet<Vector2Int> positions) {
-        if (positions.Count > 0) {
+    public Vector3 GetStructurePositionWorld(Vector2Int[] positions) {
+        if (positions.Length > 0) {
             Vector3 average = Vector3.zero;
             foreach (Vector2Int position in positions) {
                 average += GetCellCenterWorld(position);
             }
 
-            return average / positions.Count;
+            return average / positions.Length;
         } else {
             return Vector3.negativeInfinity;
         }
@@ -182,7 +183,7 @@ public class MapController : Singleton<MapController> {
     }
 
     public List<Vector3> GetStructurePositionsWorld(Structure structure) {
-        HashSet<Vector2Int> positions = _mapModel.GetStructurePositions(structure);
+        Vector2Int[] positions = _mapModel.GetStructurePositions(structure);
         List<Vector3> worldPositions = new List<Vector3>();
 
         foreach (Vector2Int position in positions) {

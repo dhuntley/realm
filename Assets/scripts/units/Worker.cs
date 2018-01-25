@@ -14,6 +14,10 @@ public class Worker : Unit {
 
     private bool carryingLumber = false;
 
+    // TODO: Instead, track the amount of lumber we are carrying, so that we can have
+    // different trees be worth different amounts of lumber.
+    private const int LUMBER_VALUE = 10;
+
     public bool isCuttingTree = false;
 
     private Vector2Int _currentTree;
@@ -97,6 +101,10 @@ public class Worker : Unit {
         HandleMoveRequest(interactionNode, () => {
             if (carryingLumber) {
                 carryingLumber = false;
+
+                // Add Lumber to the resource pool
+                ResourceManager.Instance.AddResources("wood", LUMBER_VALUE);
+
                 // Cut down next tree
                 HandleInteractionRequest(MapController.Instance.mapModel.GetNextTreePosition(lastTreeCut, this.cell));
             }

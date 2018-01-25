@@ -14,6 +14,8 @@ public abstract class Unit : MonoBehaviour {
 
     private bool isMoving = false;
 
+    public bool isBusy = false;
+
     //private bool isHovered = false;
 
     private UnityAction onArriveAction;
@@ -90,6 +92,7 @@ public abstract class Unit : MonoBehaviour {
                         navAgent.RecalculatePath();
                         hasNextPosition = false;
                     } else if (onBlockedAction != null) {
+                        hasNextPosition = false;
                         navAgent.SetDestination(onBlockedAction.Invoke());
                     }
                 }

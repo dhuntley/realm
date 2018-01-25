@@ -18,7 +18,7 @@ public class MapModel {
     private Dictionary<int, Structure> structures = new Dictionary<int, Structure>();
 
     // Structure locations
-    private Dictionary<int, HashSet<Vector2Int>> structurePositionsForward = new Dictionary<int, HashSet<Vector2Int>>();
+    private Dictionary<int, Vector2Int[]> structurePositionsForward = new Dictionary<int, Vector2Int[]>();
     private Dictionary<Vector2Int, int> structurePositionsReverse = new Dictionary<Vector2Int, int>(new Vector2IntComparer());
 
     // Trees
@@ -106,7 +106,7 @@ public class MapModel {
     }
 
     /* Structures */
-    public void AddStructure(Structure structure, HashSet<Vector2Int> positions) {
+    public void AddStructure(Structure structure, Vector2Int[] positions) {
         structures[structure.GetInstanceID()] = structure;
 
         structurePositionsForward[structure.GetInstanceID()] = positions;
@@ -122,7 +122,7 @@ public class MapModel {
 
         structures.Remove(structure.GetInstanceID());
 
-        HashSet<Vector2Int> positions = structurePositionsForward[structure.GetInstanceID()];
+        Vector2Int[] positions = structurePositionsForward[structure.GetInstanceID()];
         foreach (Vector2Int position in positions) {
             structurePositionsReverse.Remove(position);
         }
@@ -137,18 +137,17 @@ public class MapModel {
         return structures[structurePositionsReverse[cell]];
     }
 
-    public HashSet<Vector2Int> GetStructurePositions(Structure structure) {
+    public Vector2Int[] GetStructurePositions(Structure structure) {
         return structurePositionsForward[structure.GetInstanceID()];
     }
 
     public Structure GetClosestStructure(Vector2Int cell) {
         float minDistance = float.MaxValue;
         Structure closestStructure = null;
-        Vector3 cellPosition = new Vector3(cell.x, cell.y);
 
         foreach (int key in structures.Keys) {
-            Vector2Int structureCell = structurePositionsForward[key].GetEnumerator().Current;
-            float sqrDistance = (cellPosition - new Vector3(structureCell.x, structureCell.y)).sqrMagnitude;
+            Vector2Int structureCell = structurePositionsForward[key][0];
+            float sqrDistance = (cell - new Vector2Int(structureCell.x, structureCell.y)).sqrMagnitude;
 
             if (sqrDistance < minDistance) {
                 minDistance = sqrDistance;
@@ -238,7 +237,7 @@ public class MapModel {
     // We are also considering duplicate nodes.
     public Vector2Int[] GetInteractionNodes(Structure structure, Vector2Int origin) {
         List<Vector2Int> nodes = new List<Vector2Int>();
-        HashSet<Vector2Int> structurePositions = GetStructurePositions(structure);
+        Vector2Int[] structurePositions = GetStructurePositions(structure);
         foreach (Vector2Int structurePosition in structurePositions) {
             nodes.AddRange(GetInteractionNodes(structurePosition, origin));
         }

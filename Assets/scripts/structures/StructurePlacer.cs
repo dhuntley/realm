@@ -64,7 +64,7 @@ public class StructurePlacer : Singleton<StructurePlacer> {
     }
 
     private void UpdatePlacementHints() {
-        HashSet<Vector2Int> structPositions = MapController.Instance.WorldToStructurePositions(Camera.main.ScreenToWorldPoint(Input.mousePosition), structureModel.width, structureModel.length);
+        Vector2Int[] structPositions = MapController.Instance.WorldToStructurePositions(Camera.main.ScreenToWorldPoint(Input.mousePosition), structureModel.width, structureModel.length);
         Unit selectedUnit = InputController.Instance.selectedUnit;
         Vector2Int selectedUnitPosition = selectedUnit != null ? MapController.Instance.GetUnitPosition(selectedUnit) : new Vector2Int(int.MaxValue, int.MaxValue);
         bool hasResources = HasSufficientResources();
@@ -93,9 +93,16 @@ public class StructurePlacer : Singleton<StructurePlacer> {
             GameObject prefab = structurePrefab;
 
             if (HasSufficientResources()) {
-                if (InputController.Instance.selectedUnit) {
-                    InputController.Instance.selectedUnit.HandleMoveRequest(MapController.Instance.WorldToCell(position), () => {
-                        InstantiateStructure(prefab, position);
+                Unit builder = InputController.Instance.selectedUnit;
+                if (builder) {
+                    Vector2Int targetCell = MapController.Instance.WorldToCell(position);
+                    builder.HandleMoveRequest(targetCell, () => {
+                        Structure structure = InstantiateStructure(prefab, position);
+                        if (structure) {
+                            structure.builder = builder;
+                        }
+                        builder.isBusy = true;
+                        InputController.Instance.DeselectUnit(builder);
                     });
                 } else {
                     InstantiateStructure(prefab, position);
@@ -109,11 +116,13 @@ public class StructurePlacer : Singleton<StructurePlacer> {
         return ResourceManager.Instance.HasResources(structureModel);
     }
 
-    private void InstantiateStructure(GameObject prefab, Vector3 position) {
+    private Structure InstantiateStructure(GameObject prefab, Vector3 position) {
         // TODO: Re-validate structure location before placing structure, in case something has moved into the way
         if (ResourceManager.Instance.SpendResources(structureModel)) {
-            GameObject.Instantiate(prefab, position, Quaternion.identity, GameObject.FindGameObjectWithTag("Structures").transform);
+            GameObject structureGameObject = GameObject.Instantiate(prefab, position, Quaternion.identity, GameObject.FindGameObjectWithTag("Structures").transform);
+            return structureGameObject.GetComponent<Structure>();
         }
+        return null;
     }
 }
 

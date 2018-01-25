@@ -7,6 +7,8 @@ public class StructureModel : ScriptableObject {
 
     public int length = 2;
 
+    public float constructionTime = 4.0f;
+
     public Sprite sprite;
 
     public int area {
