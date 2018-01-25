@@ -8,18 +8,17 @@ public class InputController : Singleton<InputController> {
     public Color selectBorderColor;
 
     public Color selectFillColor;
-
-    private List<Unit> _selectedUnits = new List<Unit>();
-
-    public List<Unit> selectedUnits {
+    
+    public Unit[] selectedUnits {
         get {
-            return _selectedUnits;
+            return UnitManager.Instance.GetAllSelectedUnits();
         }
     }
 
     public Unit selectedUnit {
         get {
-            return _selectedUnits.Count > 0 ? _selectedUnits[0] : null;
+            Unit[] units = selectedUnits;
+            return (units != null && units.Length > 0) ? units[0] : null;
         }
     }
 
@@ -63,12 +62,12 @@ public class InputController : Singleton<InputController> {
                             frontCollider = collider;
                         }
                     }
-                    foreach (Unit playerUnit in _selectedUnits) {
+                    foreach (Unit playerUnit in selectedUnits) {
                         playerUnit.HandleInteractionRequest(frontCollider.transform.position);
                     }
                 } else {
                     // Move selected units to the target tile
-                    foreach (Unit playerUnit in _selectedUnits) {
+                    foreach (Unit playerUnit in selectedUnits) {
                         playerUnit.HandleMoveRequest(MapController.Instance.WorldToCell(mouseWorld));
                     }
                 }
@@ -100,9 +99,8 @@ public class InputController : Singleton<InputController> {
 
                 if (unitsToSelect.Count > 0) {
                     DeselectAllUnits();
-                    _selectedUnits = unitsToSelect;
-                    foreach (Unit unit in _selectedUnits) {
-                        unit.SetSelected(true);
+                    foreach (Unit unit in unitsToSelect) {
+                        unit.SetSelectedNoGUIRefresh(true);
                     }
                     RefreshGUIForSelection();
                 }
@@ -135,8 +133,7 @@ public class InputController : Singleton<InputController> {
             DeselectAllUnits();
         }
 
-        _selectedUnits.Add(unit);
-        RefreshGUIForSelection();
+        unit.selected = true;
         return true;
     }
 
@@ -145,24 +142,13 @@ public class InputController : Singleton<InputController> {
     }
 
     private void DeselectAllUnits() {
-        foreach (Unit selectedUnit in _selectedUnits) {
-            selectedUnit.SetSelected(false);
+        foreach (Unit selectedUnit in selectedUnits) {
+            selectedUnit.SetSelectedNoGUIRefresh(false);
         }
-        _selectedUnits.Clear();
         RefreshGUIForSelection();
     }
 
-    public void DeselectUnit(Unit unit) {
-        foreach (Unit selectedUnit in _selectedUnits) {
-            if (unit == selectedUnit) {
-                selectedUnit.SetSelected(false);
-            }
-        }
-        _selectedUnits.Remove(selectedUnit);
-        RefreshGUIForSelection();
-    }
-
-    public void RefreshGUIForSelection() {
+    private void RefreshGUIForSelection() {
         GUIController.Instance.RefreshForUnitSelection();
     }
 }

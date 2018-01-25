@@ -22,7 +22,7 @@ public class GUIController : Singleton<GUIController> {
 
     public void RefreshForUnitSelection() {
         Unit selectedUnit = InputController.Instance.selectedUnit;
-        if (selectedUnit == null || InputController.Instance.selectedUnits.Count > 1) {
+        if (selectedUnit == null || InputController.Instance.selectedUnits.Length > 1) {
             unitPanel.SetActive(false);
             for (int i=0; i<workerBuildPanel.transform.childCount; i++) {
                 Destroy(workerBuildPanel.transform.GetChild(i).gameObject);

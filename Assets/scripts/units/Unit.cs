@@ -30,6 +30,20 @@ public abstract class Unit : MonoBehaviour {
 
     private GameObject progressBarGameObject;
 
+    public bool selected {
+        get {
+            return selectionCircle.activeSelf;
+        }
+        set {
+            selectionCircle.SetActive(value);
+            GUIController.Instance.RefreshForUnitSelection();
+        }
+    }
+
+    public void SetSelectedNoGUIRefresh(bool selected) {
+        selectionCircle.SetActive(selected);
+    }
+
     public Vector2Int cell {
         get {
             return MapController.Instance.GetUnitPosition(this);
@@ -127,10 +141,6 @@ public abstract class Unit : MonoBehaviour {
         if (MapController.HasInstance) {
             Gizmos.DrawSphere(MapController.Instance.GetUnitPositionWorld(this), 0.1f);
         }
-    }
-
-    public void SetSelected(bool isSelected) {
-        selectionCircle.SetActive(isSelected);
     }
 
     private void OnMouseEnter() {

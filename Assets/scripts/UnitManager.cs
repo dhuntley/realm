@@ -1,9 +1,38 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class UnitManager : Singleton<UnitManager> {
 
     public T[] GetAllUnits<T>() where T: Unit {
         return FindObjectsOfType<T>();
+    }
+
+    public T[] GetAllSelectedUnits<T>() where T : Unit {
+        T[] units = FindObjectsOfType<T>();
+
+        LinkedList<T> selectedUnits = new LinkedList<T>();
+        foreach (T unit in units) {
+            if (unit.selected) {
+                selectedUnits.AddLast(unit);
+            }
+        }
+        T[] selectedUnitArray = new T[selectedUnits.Count];
+        selectedUnits.CopyTo(selectedUnitArray, 0);
+        return selectedUnitArray;
+    }
+
+    public Unit[] GetAllSelectedUnits() {
+        Unit[] units = FindObjectsOfType<Unit>();
+
+        LinkedList<Unit> selectedUnits = new LinkedList<Unit>();
+        foreach (Unit unit in units) {
+            if (unit.selected) {
+                selectedUnits.AddLast(unit);
+            }
+        }
+        Unit[] selectedUnitArray = new Unit[selectedUnits.Count];
+        selectedUnits.CopyTo(selectedUnitArray, 0);
+        return selectedUnitArray;
     }
 
     public bool TreeIsBeingCut(Vector2Int treeCell) {

@@ -102,7 +102,7 @@ public class StructurePlacer : Singleton<StructurePlacer> {
                             structure.builder = builder;
                         }
                         builder.isBusy = true;
-                        InputController.Instance.DeselectUnit(builder);
+                        builder.selected = false;
                     });
                 } else {
                     InstantiateStructure(prefab, position);
