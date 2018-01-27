@@ -77,7 +77,10 @@ public class Structure : MonoBehaviour {
         underConstruction = false;
         if (builder) {
             builder.HandleMoveRequest(MapController.Instance.mapModel.GetInteractionNode(this, builder.cell), () => {
-                builder.isBusy = false;
+                Selectable builderSelectable = builder.GetComponent<Selectable>();
+                if (builderSelectable) {
+                    builderSelectable.isBusy = false;
+                }
             });
         }
     }

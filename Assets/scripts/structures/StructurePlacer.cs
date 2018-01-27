@@ -101,8 +101,9 @@ public class StructurePlacer : Singleton<StructurePlacer> {
                         if (structure) {
                             structure.builder = builder;
                         }
-                        builder.isBusy = true;
-                        builder.selected = false;
+                        
+                        builder.GetSelectable().isBusy = true;
+                        builder.GetSelectable().selected = false;
                     });
                 } else {
                     InstantiateStructure(prefab, position);

@@ -88,19 +88,19 @@ public class InputController : Singleton<InputController> {
                 float y = Mathf.Min(mouseWorld.y, selectStartWorld.y);
 
                 Rect selectRect = new Rect(x, y, width, height);
-                Unit[] units = FindObjectsOfType<Unit>();
-                List<Unit> unitsToSelect = new List<Unit>();
+                Selectable[] selectables = GetAllSelectables();
+                List<Selectable> toSelect = new List<Selectable>();
 
-                foreach (Unit unit in units) {
-                    if (selectRect.Contains(unit.transform.position) && !unit.isBusy) {
-                        unitsToSelect.Add(unit);
+                foreach (Selectable selectable in selectables) {
+                    if (selectRect.Contains(selectable.transform.position) && !selectable.isBusy) {
+                        toSelect.Add(selectable);
                     }
                 }
 
-                if (unitsToSelect.Count > 0) {
-                    DeselectAllUnits();
-                    foreach (Unit unit in unitsToSelect) {
-                        unit.SetSelectedNoGUIRefresh(true);
+                if (toSelect.Count > 0) {
+                    DeselectAll();
+                    foreach (Selectable selectable in toSelect) {
+                        selectable.SetSelectedNoGUIRefresh(true);
                     }
                     RefreshGUIForSelection();
                 }
@@ -124,16 +124,20 @@ public class InputController : Singleton<InputController> {
         }
     }
 
-    public bool SelectUnit(Unit unit, bool clearExistingSelection) {
-        if (unit.isBusy) {
+    public Selectable[] GetAllSelectables() {
+        return FindObjectsOfType<Selectable>();
+    }
+
+    public bool Select(Selectable selectable, bool clearExistingSelection) {
+        if (selectable.isBusy) {
             return false;
         }
 
         if (clearExistingSelection) {
-            DeselectAllUnits();
+            DeselectAll();
         }
 
-        unit.selected = true;
+        selectable.selected = true;
         return true;
     }
 
@@ -141,14 +145,15 @@ public class InputController : Singleton<InputController> {
         return false;
     }
 
-    private void DeselectAllUnits() {
-        foreach (Unit selectedUnit in selectedUnits) {
-            selectedUnit.SetSelectedNoGUIRefresh(false);
+    private void DeselectAll() {
+        Selectable[] selectables = GetAllSelectables();
+        foreach (Selectable selected in selectables) {
+            selected.SetSelectedNoGUIRefresh(false);
         }
         RefreshGUIForSelection();
     }
 
     private void RefreshGUIForSelection() {
-        GUIController.Instance.RefreshForUnitSelection();
+        GUIController.Instance.RefreshForSelection();
     }
 }

@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 
 public class UnitManager : Singleton<UnitManager> {
-
     public T[] GetAllUnits<T>() where T: Unit {
         return FindObjectsOfType<T>();
+    }
+
+    public Unit[] GetAllUnits() {
+        return FindObjectsOfType<Unit>();
     }
 
     public T[] GetAllSelectedUnits<T>() where T : Unit {
@@ -12,7 +15,8 @@ public class UnitManager : Singleton<UnitManager> {
 
         LinkedList<T> selectedUnits = new LinkedList<T>();
         foreach (T unit in units) {
-            if (unit.selected) {
+            Selectable selectable = unit.GetComponent<Selectable>();
+            if (selectable && selectable.selected) {
                 selectedUnits.AddLast(unit);
             }
         }
@@ -26,7 +30,8 @@ public class UnitManager : Singleton<UnitManager> {
 
         LinkedList<Unit> selectedUnits = new LinkedList<Unit>();
         foreach (Unit unit in units) {
-            if (unit.selected) {
+            Selectable selectable = unit.GetComponent<Selectable>();
+            if (selectable && selectable.selected) {
                 selectedUnits.AddLast(unit);
             }
         }

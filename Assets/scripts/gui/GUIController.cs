@@ -20,7 +20,7 @@ public class GUIController : Singleton<GUIController> {
         workerBuildPanel.SetActive(false);
     }
 
-    public void RefreshForUnitSelection() {
+    public void RefreshForSelection() {
         Unit selectedUnit = InputController.Instance.selectedUnit;
         if (selectedUnit == null || InputController.Instance.selectedUnits.Length > 1) {
             unitPanel.SetActive(false);

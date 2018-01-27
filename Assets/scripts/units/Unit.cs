@@ -10,11 +10,7 @@ public abstract class Unit : MonoBehaviour {
     private bool hasNextPosition = false;
     private bool unitIsBlocked = false;
 
-    private GameObject selectionCircle;
-
     private bool isMoving = false;
-
-    public bool isBusy = false;
 
     //private bool isHovered = false;
 
@@ -30,20 +26,6 @@ public abstract class Unit : MonoBehaviour {
 
     private GameObject progressBarGameObject;
 
-    public bool selected {
-        get {
-            return selectionCircle.activeSelf;
-        }
-        set {
-            selectionCircle.SetActive(value);
-            GUIController.Instance.RefreshForUnitSelection();
-        }
-    }
-
-    public void SetSelectedNoGUIRefresh(bool selected) {
-        selectionCircle.SetActive(selected);
-    }
-
     public Vector2Int cell {
         get {
             return MapController.Instance.GetUnitPosition(this);
@@ -56,11 +38,6 @@ public abstract class Unit : MonoBehaviour {
 
         if (navAgent == null) {
             Debug.LogError("Could not find navAgent component on Unit game object.");
-        }
-
-        selectionCircle = transform.Find("SelectionCircle").gameObject;
-        if (selectionCircle == null) {
-            Debug.LogError("No SelectionCircle gameobject present on Unit.");
         }
 
         progressBar = GetComponentInChildren<ProgressBar>();
@@ -147,13 +124,6 @@ public abstract class Unit : MonoBehaviour {
         //isHovered = true;
     }
 
-    private void OnMouseDown() {
-        bool clearCurrentSelection = !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift);
-        if (InputController.Instance.SelectUnit(this, clearCurrentSelection)) {
-            selectionCircle.SetActive(true);
-        }
-    }
-
     private void OnMouseExit() {
         //isHovered = false;
     }
@@ -189,6 +159,10 @@ public abstract class Unit : MonoBehaviour {
 
     public void SetProgressBarEnabled(bool enabled) {
         progressBarGameObject.SetActive(enabled);
+    }
+
+    public Selectable GetSelectable() {
+        return GetComponent<Selectable>();
     }
 
     protected virtual void StopAllRequests() {
