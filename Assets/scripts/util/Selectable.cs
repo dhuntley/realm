@@ -29,9 +29,15 @@ public class Selectable : MonoBehaviour {
     }
 
     private void OnMouseDown() {
-        bool clearCurrentSelection = !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift);
-        if (InputController.Instance.Select(this, clearCurrentSelection)) {
-            selectionCircle.SetActive(true);
+        bool addToSelection = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        if (!addToSelection) {
+            InputController.Instance.DeselectAll(false);
+            selected = true;
+        } else if (addToSelection && selected) {
+            selected = false;
+        } else {
+            selected = true;
         }
+        GUIController.Instance.RefreshForSelection();
     }
 }

@@ -90,16 +90,26 @@ public class InputController : Singleton<InputController> {
                 Rect selectRect = new Rect(x, y, width, height);
                 Selectable[] selectables = GetAllSelectables();
                 List<Selectable> toSelect = new List<Selectable>();
+                bool willSelectUnits = false;
 
                 foreach (Selectable selectable in selectables) {
                     if (selectRect.Contains(selectable.transform.position) && !selectable.isBusy) {
                         toSelect.Add(selectable);
+                        if (selectable.GetComponent<Unit>()) {
+                            willSelectUnits = true;
+                        }
                     }
                 }
 
                 if (toSelect.Count > 0) {
-                    DeselectAll();
+                    bool addToSelection = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                    if (!addToSelection) {
+                        DeselectAll(false);
+                    }
                     foreach (Selectable selectable in toSelect) {
+                        if (willSelectUnits && selectable.GetComponent<Structure>()) {
+                            continue;
+                        }
                         selectable.SetSelectedNoGUIRefresh(true);
                     }
                     RefreshGUIForSelection();
@@ -128,29 +138,19 @@ public class InputController : Singleton<InputController> {
         return FindObjectsOfType<Selectable>();
     }
 
-    public bool Select(Selectable selectable, bool clearExistingSelection) {
-        if (selectable.isBusy) {
-            return false;
-        }
-
-        if (clearExistingSelection) {
-            DeselectAll();
-        }
-
-        selectable.selected = true;
-        return true;
-    }
-
     public bool IsInSelectRect(Unit unit) {
         return false;
     }
 
-    private void DeselectAll() {
+    public void DeselectAll(bool refreshGUI = true) {
         Selectable[] selectables = GetAllSelectables();
         foreach (Selectable selected in selectables) {
             selected.SetSelectedNoGUIRefresh(false);
         }
-        RefreshGUIForSelection();
+
+        if (refreshGUI) {
+            RefreshGUIForSelection();
+        }
     }
 
     private void RefreshGUIForSelection() {
