@@ -13,6 +13,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 2
   length: 2
+  constructionTime: 4
+  buildableUnits:
+  - {fileID: 11400000, guid: e79c902495513ac4dbd1fd36b5b3ccc7, type: 2}
   sprite: {fileID: 21300000, guid: 35ebaf8802bd3474ba9c4cac9a890dc3, type: 3}
   prefab: {fileID: 1881611995349126, guid: 10c6e51f35f94a649b328415389af544, type: 2}
   resourceKeys:

@@ -39,6 +39,15 @@ public class ResourceManager : Singleton<ResourceManager> {
         return true;
     }
 
+    public bool HasResources(UnitModel unitModel) {
+        foreach (string resourceKey in unitModel.resourceCostMap.Keys) {
+            if (!HasResources(resourceKey, unitModel.GetResourceCost(resourceKey))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public bool SpendResources(string key, int value) {
         if (HasResources(key, value)) {
             resourceValues[key] = resourceValues[key] - value;
@@ -54,6 +63,16 @@ public class ResourceManager : Singleton<ResourceManager> {
         if (HasResources(structureModel)) {
             foreach (string resourceKey in structureModel.resourceCostMap.Keys) {
                 SpendResources(resourceKey, structureModel.GetResourceCost(resourceKey));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public bool SpendResources(UnitModel unitModel) {
+        if (HasResources(unitModel)) {
+            foreach (string resourceKey in unitModel.resourceCostMap.Keys) {
+                SpendResources(resourceKey, unitModel.GetResourceCost(resourceKey));
             }
             return true;
         }

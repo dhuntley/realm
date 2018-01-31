@@ -1,24 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-[CreateAssetMenu(menuName = "realm/StructureModel")]
-public class StructureModel : ScriptableObject {
-    public int width = 2;
-
-    public int length = 2;
-
+[CreateAssetMenu(menuName = "realm/UnitModel")]
+public class UnitModel : ScriptableObject {
     public float constructionTime = 4.0f;
-
-    public UnitModel[] buildableUnits = new UnitModel[0];
-
-    public Sprite sprite;
-
-    public int area {
-        get { return width * length; }
-    }
-
-    public GameObject prefab;
     
+    public GameObject prefab;
+
     private Dictionary<string, int> _resourceCostMap;
 
     public Dictionary<string, int> resourceCostMap {

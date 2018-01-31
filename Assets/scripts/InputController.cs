@@ -22,6 +22,29 @@ public class InputController : Singleton<InputController> {
         }
     }
 
+    public Structure[] selectedStructures {
+        get {
+            Structure[] allStructures = GameObject.FindObjectsOfType<Structure>();
+            LinkedList<Structure> selectedList = new LinkedList<Structure>();
+            foreach (Structure structure in allStructures) {
+                Selectable selectable = structure.GetComponent<Selectable>();
+                if (selectable && selectable.selected) {
+                    selectedList.AddLast(structure);
+                }
+            }
+            Structure[] selected = new Structure[selectedList.Count];
+            selectedList.CopyTo(selected, 0);
+            return selected;
+        }
+    }
+
+    public Structure selectedStructure {
+        get {
+            Structure[] structures = selectedStructures;
+            return (structures != null && structures.Length > 0) ? structures[0] : null;
+        }
+    }
+
     private bool _isSelecting = false;
 
     public bool isSelecting {

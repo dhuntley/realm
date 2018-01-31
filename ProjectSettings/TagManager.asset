@@ -11,6 +11,7 @@ TagManager:
   - TerrainTilemap
   - TreeTilemap
   - Trees
+  - Units
   layers:
   - Default
   - TransparentFX

@@ -9,7 +9,7 @@ public class Selectable : MonoBehaviour {
 
     public bool selected {
         get {
-            return selectionCircle.activeSelf;
+            return selectionCircle ? selectionCircle.activeSelf : false;
         }
         set {
             selectionCircle.SetActive(value);
@@ -26,9 +26,14 @@ public class Selectable : MonoBehaviour {
         if (selectionCircle == null) {
             Debug.LogError("No SelectionCircle gameobject present on Unit.");
         }
+        selectionCircle.SetActive(false);
     }
 
     private void OnMouseDown() {
+        if (isBusy) {
+            return;
+        }
+
         bool addToSelection = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         if (!addToSelection) {
             InputController.Instance.DeselectAll(false);
